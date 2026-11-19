@@ -122,7 +122,9 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       columns: [
         {
           key: 'title',
-          hideable: true,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           title: t('cluster.column.name'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
@@ -161,7 +163,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
       ],
       empty: { title: t('customMonitoring.empty'), description: t('customMonitoring.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -201,6 +203,7 @@ export function ClusterCustomMonitoringPage({ cluster }: ClusterCustomMonitoring
           onRefresh={listRefresh.onRefresh}
           rows={rows}
           loading={false}
+          refreshing={listRefresh.refreshing}
           onAction={(action, row) => {
             if (action === 'create') {
               setInfoFor(null);

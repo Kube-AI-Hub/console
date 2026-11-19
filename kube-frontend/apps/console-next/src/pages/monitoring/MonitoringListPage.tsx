@@ -143,6 +143,9 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
           ? [
               {
                 key: 'message',
+                /* Pinned: the message is the row's identity — the one thing a reader scans. */
+                width: 320,
+                pin: 'start',
                 title: t('monitoring.column.message'),
                 render: (row: Row) => {
                   const alert = row as AlertMessage;
@@ -198,6 +201,9 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
           : [
               {
                 key: 'name',
+                /* Pinned: the row's identity, kept in place while the other columns scroll. */
+                width: 240,
+                pin: 'start',
                 title: t('monitoring.column.name'),
                 render: (row: Row) => {
                   const rule = row as AlertingRuleSummary;
@@ -254,7 +260,7 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -285,6 +291,10 @@ export function MonitoringListPage({ kind, workspace, cluster, namespace }: Moni
         onRefresh={listRefresh.onRefresh}
         rows={rows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={kind === 'alerts' ? { state: alertFilters.state ?? '', severity: alertFilters.severity ?? '' } : { project: projectFilter }}

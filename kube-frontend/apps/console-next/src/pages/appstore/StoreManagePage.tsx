@@ -63,7 +63,7 @@ function CategoriesTable(): React.ReactElement {
     rowAttributes: (row) => ({ 'data-ai-row': row.id }),
     columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: 'store-manage:categories:columns' },
     columns: [
-      { key: 'name', title: t('cluster.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
+      { key: 'name', width: 220, pin: 'start', title: t('cluster.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
       { key: 'description', hideable: true, title: t('store.manage.description'), width: 260, hideBelow: 'md', render: (row) => <span className="truncate text-ai-fg-secondary">{row.description || '-'}</span> },
       { key: 'appTotal', hideable: true, title: t('store.manage.appCount'), width: 120, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.appTotal}</span> },
       { key: 'createdAt', hideable: true, title: t('cluster.column.createdAt'), width: 170, hideBelow: 'lg', render: (row) => <span className="tabular-nums text-ai-fg-muted">{formatTimestamp(row.createdAt)}</span> },

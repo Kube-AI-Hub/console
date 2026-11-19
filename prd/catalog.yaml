@@ -1412,6 +1412,14 @@ modules:
       tests:
         L3:
         - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01
+    - id: list-standard
+      title: 列表交互标准
+      prd: prd/kube-frontend/app-workloads/list-standard.md
+      design: design/kube-frontend/app-workloads/list-standard.md
+      tests:
+        L3:
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01
+        - TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02
     - id: gray-release
       title: 灰度发布列表与详情
       prd: prd/kube-frontend/app-workloads/gray-release.md

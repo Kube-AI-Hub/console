@@ -74,6 +74,9 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 items-center gap-2">
               <a
@@ -127,7 +130,7 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
       ],
       empty: { title: t('cluster.network.ipPools.empty'), description: t('cluster.network.ipPools.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -160,6 +163,10 @@ export function IpPoolsPage({ cluster }: IpPoolsPageProps): React.ReactElement {
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.search}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}

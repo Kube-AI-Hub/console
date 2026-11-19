@@ -66,6 +66,9 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
       {
         key: 'name',
         title: t('cluster.column.name'),
+        /* Pinned: the row's identity, kept in place while the other columns scroll. */
+        width: 220,
+        pin: 'start',
         render: (row) => (
           <Link
             to="/kube-frontend/clusters/$cluster/edgenodes/$name"
@@ -104,7 +107,7 @@ export function EdgeNodesPage({ cluster }: EdgeNodesPageProps): React.ReactEleme
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
-          loading={query.isPending}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           searchValue={list.keyword}
           onSearchChange={list.setKeyword}
           onRefresh={() => void query.refetch()}

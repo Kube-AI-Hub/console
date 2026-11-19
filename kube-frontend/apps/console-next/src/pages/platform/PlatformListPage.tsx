@@ -158,6 +158,9 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
               {
                 key: 'name',
                 title: t('platform.column.username'),
+                /* Pinned: the row's identity, kept in place while the other columns scroll. */
+                width: 220,
+                pin: 'start',
                 render: (row: Row) => {
                   const user = row as UserSummary;
                   return (
@@ -369,7 +372,7 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         description: t(PLATFORM_DESCRIPTORS[kind].emptyDescriptionKey),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -414,6 +417,10 @@ export function PlatformListPage({ kind }: PlatformListPageProps): React.ReactEl
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}

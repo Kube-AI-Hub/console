@@ -57,9 +57,10 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
       columns: [
         {
           key: 'createdAt',
-          hideable: true,
-          title: t('cluster.column.createdAt'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
           width: 190,
+          pin: 'start',
+          title: t('cluster.column.createdAt'),
           render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.createdAt ? formatTimestamp(row.createdAt) : '-'}</span>,
         },
         {
@@ -80,7 +81,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
       ],
       empty: { title: t('appRepos.repos.eventsEmptyTitle'), description: t('appRepos.repos.eventsEmptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -184,7 +185,7 @@ export function WorkspaceRepoDetailPage({ workspace, repoId }: WorkspaceRepoDeta
             <div data-ai-id="workspace-repo-detail:events">
               <ResourceList schema={eventSchema}
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={eventRows} loading={events.isPending} onRefresh={listRefresh.onRefresh} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={eventRows} loading={events.isPending} refreshing={events.isFetching && !events.isPending} onRefresh={listRefresh.onRefresh} />
             </div>
           )}
         </TabsContent>

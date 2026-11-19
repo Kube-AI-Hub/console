@@ -109,6 +109,9 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
               {
                 key: 'name',
                 title: t('settings.column.name'),
+                /* Pinned: the row's identity, kept in place while the other columns scroll. */
+                width: 220,
+                pin: 'start',
                 render: (row: Row) => {
                   const role = row as RoleSummary;
                   const label = (
@@ -273,7 +276,7 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
           : [],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -303,6 +306,10 @@ export function SettingsListPage({ kind, workspace, cluster, namespace }: Settin
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={{ project: projectFilter }}

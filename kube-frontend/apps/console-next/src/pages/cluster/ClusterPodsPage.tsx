@@ -8,6 +8,7 @@ import { AiSurface, Badge, Button, ResourceList, type ListSchema, type SortOrder
 import { useT } from '@/i18n';
 import { useResourceListState } from '@/components/resource/useResourceListState';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
 import { formatTimestamp } from '@/lib/time';
 import { statusLabel } from '@/lib/status';
@@ -71,6 +72,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         signal,
       }),
   });
+  const listRefresh = useListRefresh('cluster-pods', query);
 
   // Namespace → workspace, so a row can link into its own project console.
   const namespaces = useQuery({
@@ -109,7 +111,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('cluster.searchPlaceholder'), aiId: 'cluster-pods:search' },
       filters: [statusFilterControl],
-      refresh: { label: t('cluster.list.refresh'), aiId: 'cluster-pods:refresh', busy: query.isFetching },
+      refresh: listRefresh.refresh,
       sortableKeys: ['name', 'createTime'],
       // Third click of the header cycle returns to the page's default order;
       // a server list must send a sort key, so "off" cannot be absent.
@@ -122,6 +124,9 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => {
             const workspace = workspaceOf.get(row.namespace) ?? 'public';
             return (
@@ -201,6 +206,7 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
       ],
       empty: { title: t('cluster.workloads.pods.empty'), description: t('cluster.workloads.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -251,9 +257,11 @@ export function ClusterPodsPage({ cluster }: ClusterPodsPageProps): React.ReactE
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        onRefresh={() => void query.refetch()}
+        onRefresh={listRefresh.onRefresh}
         filters={{ status: statusFilter }}
         onFiltersChange={(next) => {
           setStatusFilter(next['status'] ?? '');

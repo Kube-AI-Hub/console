@@ -1,0 +1,45 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list-standard
+title: 列表交互标准 · 列头字段筛选、说明与清除全部条件
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/list-standard.md
+design: design/kube-frontend/app-workloads/list-standard.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-03
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-04
+
+story:
+- US1
+
+product: 字段筛选挂在列头（不在工具栏）；选中即重新请求并回到第 1 页；工具栏出现「清除全部条件」，点击后恢复全集；可选字段的列头有可聚焦的说明按钮，且不触发排序。
+preconditions:
+- 已登录，host 集群，default 项目有部署
+steps:
+- 打开部署列表，等待主区就绪
+- 读取状态列头里的筛选触发器句柄，确认它位于 th 内而不是工具栏
+- 点开筛选，读取选项集合
+- 选择一个必然无匹配的取值（如「已停止」，当项目内没有已停止的部署时）
+- 读取空态文案、筛选触发器激活态与「清除全部条件」是否出现
+- 点「清除全部条件」，读取行数与按钮是否消失
+- 读取状态列头的说明按钮，点击并确认 aria-sort 未变化
+expected:
+- 状态筛选触发器位于状态列 th 内；工具栏只有项目范围与搜索
+- 选项为「全部状态 / 运行中 / 更新中 / 已停止」
+- 选择后请求带 status=<取值>，列表回到第 1 页
+- 无匹配时空态是「没有匹配的结果」而不是「暂无数据」
+- 筛选激活时触发器带 data-active="true"，「清除全部条件」可见
+- 点击清除后恢复原行数，按钮消失，触发器不再激活
+- 说明按钮是 button（可聚焦），点击后该列 aria-sort 不变
+troubleshoot:
+- 筛选出现在工具栏：ListFilter 没有写 column 字段
+- 选了没反应：选项值不是该 getter 的词表（未知值静默返回 0 行）
+- 清除后按钮不消失：页面没有把 filters 的当前值传给 ResourceList
+update_automation:
+- 列头筛选句柄：<pagePrefix>:filter:<column>；重置：<pagePrefix>:filter:<column>:reset
+- 「清除全部条件」：<sortAiPrefix>:filters-clear
+- 说明按钮用 aria-label="<列名>" 定位，断言 aria-sort 前后一致

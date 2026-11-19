@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { accessReviewApi, clustersApi, type ClusterSummary } from '@kube-ai-hub/api-client';
 import { AiSurface, Badge, ResourceList, type ListSchema, type SortOrder } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { useResourceListState } from '@/components/resource/useResourceListState';
@@ -53,6 +54,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
     staleTime: 60_000,
     queryFn: ({ signal }) => clustersApi(apiClient).list({ signal }),
   });
+  const listRefresh = useListRefresh('clusters', query);
 
   /*
    * Whether this account may import a cluster.
@@ -139,7 +141,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
           ],
         },
       ],
-      refresh: { label: t('cluster.list.refresh'), aiId: 'clusters:refresh', busy: query.isFetching },
+      refresh: listRefresh.refresh,
       sortableKeys: ['name', 'createTime', 'nodeCount'],
       // Third click of the header cycle returns to the page's default order;
       // a server list must send a sort key, so "off" cannot be absent.
@@ -151,6 +153,9 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row: ClusterSummary) => (
             <span className="flex min-w-0 flex-col" data-ai-id={`clusters:name:${row.name}`}>
               {/* Linked to the cluster console: the next question about a cluster is
@@ -327,6 +332,7 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
       ],
       empty: { title: t('cluster.list.emptyTitle'), description: t('cluster.list.emptyDescription') },
       labels: {
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -360,11 +366,13 @@ export function MultiClusterListPage(_props: MultiClusterListPageProps): React.R
         schema={schema}
         rows={pageRows}
         loading={state === 'loading'}
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={{ type: typeFilter }}
         onFiltersChange={(next) => setTypeFilter(next.type ?? '')}
-        onRefresh={() => void query.refetch()}
+        onRefresh={listRefresh.onRefresh}
         onPageChange={setPage}
         onPageSizeChange={(size: number) => {
           setPageSize(size);

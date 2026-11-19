@@ -101,6 +101,9 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
         {
           key: 'name',
           title: t('devopsProject.s2ibuilder.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -203,7 +206,7 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
         description: t('devopsProject.s2ibuilder.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -249,6 +252,10 @@ export function ImageBuilderPage({ workspace, cluster, namespace }: ImageBuilder
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onRefresh={listRefresh.onRefresh}

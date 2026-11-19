@@ -137,6 +137,9 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
         {
           key: 'name',
           title: t('workspace.field.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <Link
               to="/kube-frontend/workspaces/$workspace/roles/$name"
@@ -175,7 +178,7 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
       ],
       empty: { title: t('common.empty'), description: t('settings.roles.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -209,6 +212,10 @@ export function WorkspaceRolesPage({ workspace }: WorkspaceRolesPageProps): Reac
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
+
+          // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+          // and the refresh button's spinner has something to explain.
+          refreshing={listRefresh.refreshing}
           {...(paged ? { onPageChange: setPage, onPageSizeChange: (next: number) => { setPageSize(next); setPage(1); } } : {})}
           onAction={(action, row) => {
             if (action === 'create') {

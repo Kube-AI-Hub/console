@@ -115,6 +115,9 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -173,7 +176,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
       ],
       empty: { title: t('appRepos.apps.emptyTitle'), description: t('appRepos.apps.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -223,7 +226,7 @@ export function WorkspaceAppsPage({ workspace }: WorkspaceAppsPageProps): React.
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
-          loading={query.isPending}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           onRefresh={listRefresh.onRefresh}
           onAction={(action) => {
             if (action === 'create') {

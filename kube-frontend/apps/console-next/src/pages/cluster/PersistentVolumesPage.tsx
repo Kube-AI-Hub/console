@@ -188,6 +188,9 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col" {...actionProps(`persistentvolumes:name:${row.name}`)}>
               <Link
@@ -266,7 +269,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
       ],
       empty: { title: t('cluster.persistentVolumes.emptyTitle'), description: t('cluster.persistentVolumes.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -307,7 +310,7 @@ export function PersistentVolumesPage({ cluster }: PersistentVolumesPageProps): 
         rows={pageRows}
         // The list takes ~24s on this cluster; showing the skeleton while a refetch is
         // in flight is what tells the reader the page is working.
-        loading={query.isFetching}
+        loading={query.isPending} refreshing={query.isFetching && !query.isPending}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         selectedKeys={list.selected}

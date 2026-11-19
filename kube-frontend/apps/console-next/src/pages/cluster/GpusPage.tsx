@@ -109,9 +109,10 @@ export function GpusPage({ cluster }: GpusPageProps): React.ReactElement {
       columns: [
         {
           key: 'nodeName',
-          hideable: true,
-          title: t('cluster.gpu.column.node'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
           width: 170,
+          pin: 'start',
+          title: t('cluster.gpu.column.node'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -229,7 +230,7 @@ export function GpusPage({ cluster }: GpusPageProps): React.ReactElement {
       <StatisticsGroup items={summary} unknownLabel={t('node.list.unknown')}
         data-ai-id="cluster-gpus:health" data-ai-total={health?.total} data-ai-healthy={health?.healthy} />
       {stats.isError && cluster === 'host' ? <ResourceErrorPanel error={stats.error} onRetry={() => void stats.refetch()} retryAiId="cluster-gpus:stats-retry" /> : null}
-      <ResourceList schema={schema} rows={rows} loading={state === 'loading'}
+      <ResourceList schema={schema} rows={rows} loading={state === 'loading'} refreshing={devices.isFetching && !devices.isPending}
         errorContent={devices.isError ? <ResourceErrorPanel error={devices.error} onRetry={() => void devices.refetch()} retryAiId="cluster-gpus:retry" retryable={cluster === 'host'} /> : undefined}
         filters={filters} onFiltersChange={(next) => {
           setFilters(next);

@@ -63,6 +63,9 @@ export function ComposedAppsPage({ workspace, cluster, namespace }: ComposedApps
         {
           key: 'name',
           title: t('workspace.field.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <Link
               to="/kube-frontend/$workspace/clusters/$cluster/projects/$namespace/applications/composing/$name"
@@ -116,7 +119,7 @@ export function ComposedAppsPage({ workspace, cluster, namespace }: ComposedApps
       ],
       empty: { title: t('composedApps.empty.title'), description: t('composedApps.empty.description') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -154,6 +157,10 @@ export function ComposedAppsPage({ workspace, cluster, namespace }: ComposedApps
           onRefresh={listRefresh.onRefresh}
           rows={rows}
           loading={state === 'loading'}
+
+          // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+          // and the refresh button's spinner has something to explain.
+          refreshing={listRefresh.refreshing}
           onAction={(action) => {
             if (action === 'create') setCreating(true);
           }}

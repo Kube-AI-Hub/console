@@ -111,7 +111,9 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
       columns: [
         {
           key: 'project',
-          hideable: true,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           title: t('workspace.field.project'),
           render: (row) => <span className="truncate font-medium text-ai-fg">{row.project}</span>,
         },
@@ -144,7 +146,7 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
         description: projectCount > 0 ? t('workspace.quota.empty') : t('workspace.projects.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -181,6 +183,10 @@ export function WorkspaceQuotaPage({ workspace }: WorkspaceQuotaPageProps): Reac
           onRefresh={listRefresh.onRefresh}
           rows={visibleRows}
           loading={state === 'loading'}
+
+          // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+          // and the refresh button's spinner has something to explain.
+          refreshing={listRefresh.refreshing}
           {...(paged ? { onPageChange: setPage, onPageSizeChange: (next: number) => { setPageSize(next); setPage(1); } } : {})}
         />
       </div>

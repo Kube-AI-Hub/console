@@ -89,7 +89,9 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
       columns: [
         {
           key: 'kind',
-          hideable: true,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           title: t('cluster.customResources.kind'),
           render: (row: CustomResourceSummary) => (
             <span className="flex min-w-0 flex-col" data-ai-id={`custom-resources:kind:${row.name}`}>
@@ -162,7 +164,7 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         description: t('cluster.customResources.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -197,6 +199,10 @@ export function CustomResourcesPage({ cluster }: CustomResourcesPageProps): Reac
         onRefresh={listRefresh.onRefresh}
         rows={pageRows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={setPage}

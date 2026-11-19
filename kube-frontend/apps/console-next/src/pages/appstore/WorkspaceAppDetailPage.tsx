@@ -190,7 +190,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
       ],
       empty: { title: t('appRepos.apps.versionsEmpty') },
       labels: {
-        ...versionsRefresh.emptyLabels,
+        ...versionsRefresh.emptyLabels, ...versionsRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -216,6 +216,9 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
         {
           key: 'name',
           title: t('installedApps.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <Link
               to="/kube-frontend/workspaces/$workspace/apps/instances/$releaseId"
@@ -362,7 +365,7 @@ export function WorkspaceAppDetailPage({ workspace, appId }: WorkspaceAppDetailP
               <ResourceList
                 {...(instanceSchemaVisibility.visibleColumnKeys ? { visibleColumnKeys: instanceSchemaVisibility.visibleColumnKeys } : {})}
                 onVisibleColumnsChange={instanceSchemaVisibility.setVisibleColumnKeys}
-                schema={instanceSchema} rows={instances.data ?? []} loading={instances.isPending} onRefresh={instancesRefresh.onRefresh} />
+                schema={instanceSchema} rows={instances.data ?? []} loading={instances.isPending} refreshing={instances.isFetching && !instances.isPending} onRefresh={instancesRefresh.onRefresh} />
               <p className="mt-2 text-[11px] text-ai-fg-muted">{t('appRepos.apps.instancesHint', { workspace })}</p>
             </div>
           )}

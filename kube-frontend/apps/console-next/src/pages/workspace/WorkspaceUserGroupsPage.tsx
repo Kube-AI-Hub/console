@@ -253,6 +253,9 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
         {
           key: 'username',
           title: t('workspace.field.member'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => <span className="truncate font-medium text-ai-fg">{row.username}</span>,
         },
       ],
@@ -385,7 +388,7 @@ export function WorkspaceUserGroupsPage({ workspace }: WorkspaceUserGroupsPagePr
                       onRefresh={listRefresh.onRefresh}
                       schema={memberSchema}
                       rows={memberRows}
-                      loading={membersQuery.isPending}
+                      loading={membersQuery.isPending} refreshing={membersQuery.isFetching && !membersQuery.isPending}
                       {...(showMemberSearch ? { searchValue: keyword, onSearchChange: setKeyword } : {})}
                       onAction={(key, row) => {
                         if (key === 'remove-member' && row) {

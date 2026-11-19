@@ -96,6 +96,9 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row: CustomResourceInstance) => (
             <span className="truncate font-medium text-ai-fg" {...actionProps(`custom-resource:instance:${row.name}`)}>
               {row.name}
@@ -132,7 +135,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
         description: t('cluster.customResources.instancesEmptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -211,6 +214,7 @@ export function CustomResourceDetailPage({ cluster, name }: CustomResourceDetail
             onRefresh={listRefresh.onRefresh}
             rows={pageRows}
             loading={false}
+            refreshing={listRefresh.refreshing}
             searchValue={list.keyword}
             onSearchChange={list.setKeyword}
             onPageChange={setPage}

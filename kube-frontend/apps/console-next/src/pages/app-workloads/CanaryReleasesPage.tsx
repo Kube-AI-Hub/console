@@ -97,6 +97,9 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
         {
           key: 'name',
           title: t('grayRelease.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -177,7 +180,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
       rowActions: [],
       empty: { title: t('grayRelease.emptyTitle'), description: t('grayRelease.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -218,7 +221,7 @@ export function CanaryReleasesPage({ workspace, cluster, namespace }: CanaryRele
           schema={schema}
           onRefresh={listRefresh.onRefresh}
           rows={pageRows}
-          loading={query.isFetching}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           searchValue={list.keyword}
           onSearchChange={list.setKeyword}
           onPageChange={setPage}

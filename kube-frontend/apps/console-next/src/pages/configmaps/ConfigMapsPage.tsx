@@ -143,6 +143,9 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
         {
           key: 'name',
           title: t('configmaps.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           /*
            * Two lines, as in the old console's `Avatar`: the display name on top,
            * the description below. The alias is not appended to the name in the
@@ -255,7 +258,7 @@ export function ConfigMapsPage({ workspace, cluster, namespace }: ConfigMapsPage
       // Screen-reader text for the built-in controls; without these an English
       // page still announces 全选 / 上一页.
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -300,6 +303,10 @@ const state = query.isPending ? 'loading' : query.isError ? 'error' : items.leng
         onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={keyword}
         onSearchChange={setKeyword}
         filters={{ project: projectFilter }}

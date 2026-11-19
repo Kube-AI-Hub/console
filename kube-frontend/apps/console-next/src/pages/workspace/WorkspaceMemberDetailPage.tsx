@@ -76,6 +76,9 @@ function MemberResourceTable({
         {
           key: 'name',
           title: t('workspace.field.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) =>
             kind === 'projects' && cluster ? (
               <a
@@ -131,7 +134,7 @@ function MemberResourceTable({
     <div data-ai-id={`workspace-member-detail:${kind}`}>
       <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={loading} onRefresh={listRefresh.onRefresh} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} rows={rows} loading={loading} refreshing={listRefresh.refreshing} onRefresh={listRefresh.onRefresh} />
     </div>
   );
 }

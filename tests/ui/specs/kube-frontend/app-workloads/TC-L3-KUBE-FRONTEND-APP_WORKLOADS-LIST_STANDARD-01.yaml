@@ -1,0 +1,41 @@
+id: TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01
+level: 3
+suite: point
+module: kube-frontend
+submodule: app-workloads
+feature: list-standard
+title: 列表交互标准 · 固定首尾列与刷新可见
+entry_url: "{BASE_URL}/kube-frontend/system-workspace/clusters/host/projects/default/deployments"
+prd: prd/kube-frontend/app-workloads/list-standard.md
+design: design/kube-frontend/app-workloads/list-standard.md
+
+covers:
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01
+- AC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02
+
+story:
+- US1
+
+product: 列表横向滚动时身份列固定在起始边、操作列固定在结束边；点刷新时保留现有行并显示「更新中…」遮罩，首次加载才用骨架行。
+preconditions:
+- 已登录，host 集群，default 项目有至少一条部署
+- 视口收窄到表格必然横向滚动的宽度
+steps:
+- 打开部署列表，等待主区就绪
+- 把表格容器横向滚动一段距离，读取身份列与操作列相对容器的坐标
+- 读取身份列单元格的 computed position 与背景色
+- 点刷新按钮，读取刷新遮罩与 aria-busy，同时确认行数未变
+- 等遮罩消失，再次读取行数
+expected:
+- 身份列（名称）的 position 为 sticky，横向滚动后其左边界与容器左边界差值保持稳定（不随 scrollLeft 变化）
+- 操作列贴住容器右边界
+- 固定列背景不是透明（滚动内容不会穿透）
+- 刷新时出现「更新中…」遮罩且 aria-busy=true，行数等于刷新前的行数
+- 遮罩消失后行数仍大于 0
+troubleshoot:
+- 固定列跟着滚：列没有 pin，或 pin 没有声明 width（共享层会忽略无宽度的 pin）
+- 刷新无反馈：页面只传了 loading（isFetching），没有传 refreshing
+- 刷新时行消失：loading 用了 isFetching，把重取当成首次加载
+update_automation:
+- 遮罩句柄：data-ai-id="table:refreshing"；容器在 refreshing 时带 aria-busy="true"
+- 身份列用 tbody tr td:nth-child(2)（第 1 个是选择框），操作列取最后一个 th

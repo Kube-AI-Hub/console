@@ -97,7 +97,9 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
       columns: [
         {
           key: 'summary',
-          hideable: true,
+          /* Pinned: the message is the row's identity — the one thing a reader scans. */
+          width: 320,
+          pin: 'start',
           title: t('monitoring.column.message'),
           render: (row) => (
             /*
@@ -171,7 +173,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         description: t('cluster.alerting.messages.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -222,7 +224,7 @@ export function ClusterAlertingMessagesPage({ cluster }: ClusterAlertingMessages
         schema={schema}
         onRefresh={listRefresh.onRefresh}
         rows={rows}
-        loading={pageState === 'loading'}
+        loading={pageState === 'loading'} refreshing={listRefresh.refreshing}
         onPageChange={(next) => { setPage(next); }}
         onPageSizeChange={(next) => { setPageSize(next); setPage(1); }}
         onAction={(action, row) => {

@@ -169,6 +169,9 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         {
           key: 'name',
           title: t('secrets.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           // Two lines as in the old `Avatar`: display name on top (the alias
           // *replaces* the name), description below with `-` when empty.
           render: (row) => (
@@ -240,7 +243,7 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
       ],
       empty: { title: t('secrets.empty.title'), description: t('secrets.empty.description') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -277,6 +280,10 @@ export function SecretsPage({ workspace, cluster, namespace }: SecretsPageProps)
         onRefresh={listRefresh.onRefresh}
         rows={items}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={{ project: projectFilter }}

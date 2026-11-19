@@ -35,7 +35,19 @@ export function projectObjectUrl(params: {
   cluster: string;
   workspace: string;
   namespace: string;
-  page: 'secrets' | 'configmaps' | 'serviceaccounts' | 'persistentvolumeclaims' | 'ingresses';
+  page:
+    | 'secrets'
+    | 'configmaps'
+    | 'serviceaccounts'
+    | 'persistentvolumeclaims'
+    | 'ingresses'
+    | 'deployments'
+    | 'statefulsets'
+    | 'daemonsets'
+    | 'jobs'
+    | 'cronjobs'
+    | 'services'
+    | 'pods';
   name: string;
 }): string {
   return (

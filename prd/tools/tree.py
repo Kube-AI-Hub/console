@@ -1222,6 +1222,14 @@ MODULES = [
                         "tests": {"L3": ["TC-L3-KUBE-FRONTEND-APP_WORKLOADS-COLUMN_VISIBILITY-01"]},
                     },
                     {
+                        "id": "list-standard",
+                        "title": "列表交互标准",
+                        "tests": {"L3": [
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-01",
+                            "TC-L3-KUBE-FRONTEND-APP_WORKLOADS-LIST_STANDARD-02",
+                        ]},
+                    },
+                    {
                         "id": "gray-release",
                         "title": "灰度发布列表与详情",
                         "tests": {"L3": [

@@ -154,7 +154,9 @@ export function WorkspaceDevopsPage({ workspace }: WorkspaceDevopsPageProps): Re
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
           width: 260,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -213,7 +215,7 @@ export function WorkspaceDevopsPage({ workspace }: WorkspaceDevopsPageProps): Re
         description: t('workspace.devops.emptyHint'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -281,6 +283,7 @@ export function WorkspaceDevopsPage({ workspace }: WorkspaceDevopsPageProps): Re
             onRefresh={listRefresh.onRefresh}
             rows={pageRows}
             loading={false}
+            refreshing={listRefresh.refreshing}
             searchValue={list.keyword}
             onSearchChange={list.setKeyword}
             onPageChange={list.setPage}

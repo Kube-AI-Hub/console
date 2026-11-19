@@ -391,6 +391,8 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
           key: 'name',
           title: t('monitoring.column.name'),
           width: 240,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <span className="truncate font-medium text-ai-fg">{displayName(row)}</span>
@@ -516,7 +518,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
         description: t('cluster.alerting.policies.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -682,6 +684,7 @@ export function ClusterAlertingPoliciesPage({ cluster }: ClusterAlertingPolicies
               onBulkAction={onBulkAction}
               rows={pageRows}
               loading={false}
+              refreshing={listRefresh.refreshing}
               filters={filters}
               onFiltersChange={(next) => {
                 setFilters(next);

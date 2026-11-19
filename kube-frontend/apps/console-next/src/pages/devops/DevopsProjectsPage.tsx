@@ -124,6 +124,9 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <Link
               to="/kube-frontend/clusters/$cluster/devops/$name"
@@ -161,7 +164,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
       ],
       empty: { title: t('devops.list.emptyTitle'), description: t('devops.list.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -193,7 +196,7 @@ export function DevopsProjectsPage({ cluster }: DevopsProjectsPageProps): React.
       </div>
       <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} refreshing={listRefresh.refreshing} />
       <DevopsProjectCreateDialog
         open={creating}
         onOpenChange={(open) => {

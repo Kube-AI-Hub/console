@@ -100,12 +100,12 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
       rowAttributes: (row) => ({ 'data-ai-row': `${row.kind}/${row.name}` }),
       columns: [
         { key: 'kind', hideable: true, title: t('installedApps.column.app'), width: 160, render: (row) => <span className="text-ai-fg-secondary">{row.kind}</span> },
-        { key: 'name', title: t('installedApps.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
+        { key: 'name', width: 220, pin: 'start', title: t('installedApps.column.name'), render: (row) => <span className="truncate font-medium text-ai-fg">{row.name}</span> },
         { key: 'detail', hideable: true, title: t('installedApps.column.status'), width: 160, render: (row) => <span className="tabular-nums text-ai-fg-secondary">{row.detail}</span> },
       ],
       empty: { title: t('installedApps.resourcesEmptyTitle'), description: t('installedApps.resourcesEmptyDescription') },
       labels: {
-        ...resourcesRefresh.emptyLabels,
+        ...resourcesRefresh.emptyLabels, ...resourcesRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -264,7 +264,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
             <div data-ai-id="installed-app:resources">
               <ResourceList schema={resourceSchema}
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={resources.data ?? []} loading={resources.isPending} onRefresh={resourcesRefresh.onRefresh} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} rows={resources.data ?? []} loading={resources.isPending} refreshing={resources.isFetching && !resources.isPending} onRefresh={resourcesRefresh.onRefresh} />
             </div>
           )}
         </TabsContent>
@@ -274,7 +274,7 @@ export function InstalledAppDetailPage({ workspace, releaseId, cluster: routeClu
             <ResourceErrorPanel error={events.error} onRetry={() => void events.refetch()} retryAiId="installed-app:events-retry" />
           ) : (
             <div data-ai-id="installed-app:events">
-              <ResourceList schema={eventSchema} rows={events.data ?? []} loading={events.isPending} onRefresh={eventsRefresh.onRefresh} />
+              <ResourceList schema={eventSchema} rows={events.data ?? []} loading={events.isPending} refreshing={events.isFetching && !events.isPending} onRefresh={eventsRefresh.onRefresh} />
             </div>
           )}
         </TabsContent>

@@ -149,6 +149,9 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
         {
           key: 'name',
           title: t('installedApps.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               {project ? (
@@ -223,7 +226,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
       ],
       empty: { title: t('installedApps.emptyTitle'), description: t('installedApps.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -266,7 +269,7 @@ export function InstalledAppsPage({ workspace, project, cluster = 'host' }: Inst
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={visibleRows}
-          loading={query.isPending}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           searchValue={keyword}
           onSearchChange={setKeyword}
           onRefresh={listRefresh.onRefresh}

@@ -127,6 +127,9 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
           ? [
               {
                 key: 'name',
+                /* Pinned: the row's identity, kept in place while the other columns scroll. */
+                width: 220,
+                pin: 'start',
                 title: t('cluster.column.name'),
                 render: (row: Row) => {
                   const node = row as NodeSummary;
@@ -351,6 +354,7 @@ function NamespaceListPage({ kind, cluster }: ClusterListPageProps): React.React
         schema={schema}
         rows={rows}
         loading={state === 'loading'}
+        refreshing={query.isFetching && !query.isPending}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         onPageChange={list.setPage}

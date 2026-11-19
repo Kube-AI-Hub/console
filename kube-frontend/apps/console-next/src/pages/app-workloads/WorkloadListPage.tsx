@@ -7,6 +7,7 @@ import { api as apiClient, workloadsApi } from '@/api';
 import { useProjectFilter } from '@/components/projects/useProjects';
 import { useResourceListState, toListParams } from '@/components/resource/useResourceListState';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { DeleteDialog } from '@/components/resource/DeleteDialog';
 import { ResourceErrorPanel, MutationAlert } from '@/components/resource/ResourceErrorPanel';
 import { PageTip } from '@/components/resource/PageTip';
@@ -93,10 +94,17 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
    * (`Waiting / Running / Completed / Error`). It is a real server-side filter, not a
    * client-side pass over the current page: filtering one page of ten would claim
    * "no waiting pods" while the rest of the project has plenty.
+   *
+   * The other kinds accept the same parameter with their own vocabularies —
+   * `deployments`/`statefulsets`/`daemonsets` compare against
+   * `running|updating|stopped`, `jobs` against `running|completed|failed` — so each
+   * descriptor declares its own option list rather than sharing the pod wording.
+   * Verified against the deployed apiserver: an unknown value returns 0 rows for
+   * every one of these getters, i.e. the filter is really applied server-side.
    */
   const [statusFilter, setStatusFilter] = React.useState('');
   React.useEffect(() => setStatusFilter(''), [cluster, namespace]);
-  const statusFilterValue = kind === 'pods' ? statusFilter : '';
+  const statusFilterValue = descriptor.statusFilter ? statusFilter : '';
   const query = useWorkloads(kind, {
     ...toListParams(list, { cluster, namespace: projectFilter }),
     ...(statusFilterValue ? { filters: { status: statusFilterValue } } : {}),
@@ -116,22 +124,29 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
   const total = query.data?.total ?? 0;
   const api = workloadsApi(apiClient, kind);
   const projectFilterControl = useProjectFilter(cluster, t('workloads.filter.projectLabel'), t('workloads.filter.project'), undefined, 'workloads:filter:project');
-  /** The four states the kapis pods getter filters on, in the old console's order. */
+  /**
+   * The status filter, attached to the status column.
+   *
+   * It used to sit in the toolbar. A field's own filter belongs at the field: the
+   * reader narrows 状态 by clicking the 状态 header, and the toolbar keeps only the
+   * controls that are not a column — the row search and the project scope (see
+   * `ListFilter.column`).
+   *
+   * The option values come from the descriptor because each getter has its own
+   * vocabulary (see `WORKLOAD_STATUS_FILTER` / `JOB_STATUS_FILTER` /
+   * `POD_STATUS_FILTER`); a single hard-coded list silently emptied five of the
+   * seven lists.
+   */
   const statusFilterControl = React.useMemo(
     () => ({
       key: 'status',
+      column: 'status',
       title: t('workloads.filter.statusLabel'),
       allLabel: t('workloads.filter.status'),
-      options: [
-        { value: 'Waiting', label: t('workloads.filter.status.waiting') },
-        { value: 'Running', label: t('workloads.filter.status.running') },
-        { value: 'Completed', label: t('workloads.filter.status.completed') },
-        { value: 'Error', label: t('workloads.filter.status.error') },
-      ],
+      options: (descriptor.statusFilter ?? []).map((option) => ({ value: option.value, label: t(option.labelKey) })),
       aiId: `${kind}:filter:status`,
-      widthClass: 'w-full sm:w-44',
     }),
-    [kind, t],
+    [descriptor.statusFilter, kind, t],
   );
 
   /** Opens the dialog frame first, then fills it: a silent wait reads as a dead click. */
@@ -156,6 +171,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
     [descriptor.statusKeys, t],
   );
 
+  const listRefresh = useListRefresh(kind, query);
+
   const schema = React.useMemo<ListSchema<WorkloadSummary>>(
     () => ({
       title: t(descriptor.titleKey),
@@ -163,7 +180,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       rowKey: 'name',
       rowAttributes: (row) => ({ 'data-ai-row': row.name }),
       search: { placeholder: t('workloads.searchPlaceholder'), aiId: `${kind}:search` },
-      filters: kind === 'pods' ? [projectFilterControl, statusFilterControl] : [projectFilterControl],
+      filters: descriptor.statusFilter ? [projectFilterControl, statusFilterControl] : [projectFilterControl],
       selection: 'multiple',
       sortableKeys: ['name', 'createTime'],
       // Third click of the header cycle returns to the page's default order;
@@ -174,7 +191,7 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
       sort: { key: list.sortBy, order: list.order },
       // The identity column stays non-hideable, so the table can never become empty.
       columnVisibility: { label: t('node.list.columns'), resetLabel: t('node.list.resetColumns'), aiId: `${kind}:columns` },
-      refresh: { label: t('common.refresh'), aiId: `${kind}:refresh`, busy: query.isFetching },
+      refresh: listRefresh.refresh,
       /*
        * 创建 is a *primary* action, not a bulk one: it belongs in the header and is
        * available regardless of selection. Bulk actions only exist once rows are
@@ -221,6 +238,13 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         {
           key: 'name',
           title: t('workloads.column.name'),
+          /*
+           * Pinned: the name is how a reader keeps their place while the metric
+           * columns scroll past. It carries a width because a pinned column without
+           * one shifts as names change length.
+           */
+          width: 220,
+          pin: 'start',
           // Two lines like the old `Avatar`: display name (alias replaces the name)
           // and the app label under it, `-` when the workload carries none.
           render: (row) => (
@@ -250,6 +274,15 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
                 title: t('workloads.column.status'),
                 width: 140,
                 hideBelow: 'md' as const,
+                /*
+                 * The header explains what the badge means, because the same word
+                 * means different things per kind: 更新中 on a Deployment is
+                 * "rolling out", on a Job it is "a run failed". The status column is
+                 * where the filter hangs too, so this hint is also the only place the
+                 * filter's vocabulary is written down.
+                 */
+                hint: descriptor.statusHintKey ? t(descriptor.statusHintKey) : undefined,
+                hintLabel: t('workloads.column.status'),
                 render: (row: WorkloadSummary) => (
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <Badge tone={statusTone(row.status)}>{statusLabel(row.status)}</Badge>
@@ -278,6 +311,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
                 title: t('workloads.column.ready'),
                 width: 110,
                 hideBelow: 'lg' as const,
+                hint: t('workloads.hint.ready'),
+                hintLabel: t('workloads.column.ready'),
                 render: (row: WorkloadSummary) =>
                   row.total === undefined ? (
                     <span className="text-ai-fg-muted">-</span>
@@ -299,6 +334,8 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
                 title: t('workloads.column.ports'),
                 width: 200,
                 hideBelow: 'md' as const,
+                hint: t('workloads.hint.ports'),
+                hintLabel: t('workloads.column.ports'),
                 render: (row: WorkloadSummary) => (
                   <span className="truncate font-mono text-[11px] text-ai-fg-secondary">
                     {row.ports.length === 0 ? '-' : row.ports.map((p) => `${p.port}→${p.targetPort}`).join(', ')}
@@ -403,6 +440,9 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         ...(descriptor.allowDelete === false ? [] : [{ key: 'delete', label: t('common.delete'), tone: 'danger' as const }]),
       ],
       empty: { title: t(descriptor.emptyTitleKey), description: t(descriptor.emptyDescriptionKey) },
+      // A narrowed list whose filters exclude everything says so, instead of claiming
+      // the project has no objects at all.
+      narrowed: Boolean(list.search) || (descriptor.statusFilter ? Boolean(statusFilter) : false),
       labels: {
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
@@ -410,6 +450,14 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         previous: t('table.previous'),
         next: t('table.next'),
         selected: (count) => t('table.selectedCount', { count }),
+        pageSize: t('table.pageSize'),
+        pageSizeSuffix: t('table.pageSizeSuffix'),
+        range: (from, to, count) => t('table.range', { from, to, total: count }),
+        goToPage: t('table.goToPage'),
+        jumpTo: t('table.jumpTo'),
+        clearSearch: t('workloads.filter.clearSearch'),
+        clearFilters: t('node.filter.clearAll'),
+        clearFilter: (title) => t('node.filter.clear', { title }),
         emptyClear: t('table.clearSearchAndFilters'),
         emptyRefresh: t('common.refresh'),
       },
@@ -469,13 +517,17 @@ export function WorkloadListPage({ descriptor, workspace, cluster, namespace }: 
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
         loading={state === 'loading'}
+        // A refetch keeps the rows on screen; replacing them with skeletons made the
+        // table blink on every filter change and hid the fact that a refresh was
+        // running (guide: 等待必须可见).
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
-        onRefresh={() => void query.refetch()}
-        filters={kind === 'pods' ? { project: projectFilter, status: statusFilter } : { project: projectFilter }}
+        onRefresh={listRefresh.onRefresh}
+        filters={descriptor.statusFilter ? { project: projectFilter, status: statusFilter } : { project: projectFilter }}
         onFiltersChange={(next) => {
           setProjectFilter(next['project'] ?? '');
-          if (kind === 'pods') setStatusFilter(next['status'] ?? '');
+          if (descriptor.statusFilter) setStatusFilter(next['status'] ?? '');
           list.setPage(1);
         }}
         selectedKeys={list.selected}

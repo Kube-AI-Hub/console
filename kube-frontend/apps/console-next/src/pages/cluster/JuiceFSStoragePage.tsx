@@ -139,6 +139,9 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
         {
           key: 'name',
           title: t('storage.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col" {...actionProps(AI_ID + ':volume:' + row.name)}>
               <span className="truncate font-medium text-ai-fg">{row.name}</span>
@@ -213,7 +216,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
       ],
       empty: { title: t('cluster.juicefs.volumesEmpty.title'), description: t('cluster.juicefs.volumesEmpty.description') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -257,7 +260,7 @@ export function JuiceFSStoragePage({ cluster }: JuiceFSStoragePageProps): React.
             ) : (
               <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={false} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={false} refreshing={listRefresh.refreshing} />
             )}
           </div>
         </TabsContent>

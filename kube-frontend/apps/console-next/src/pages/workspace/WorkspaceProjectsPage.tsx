@@ -49,6 +49,9 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
         {
           key: 'name',
           title: t('workspace.field.project'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <a
               href={`/kube-frontend/${encodeURIComponent(workspace)}/clusters/${encodeURIComponent(cluster)}/projects/${encodeURIComponent(row.name)}/overview`}
@@ -95,7 +98,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
       ],
       empty: { title: t('workspace.projects.empty'), description: t('workspace.projects.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -123,7 +126,7 @@ export function WorkspaceProjectsPage({ workspace }: WorkspaceProjectsPageProps)
     <AiSurface as="section" aiId="workspace-projects:surface" state={state} className="min-w-0">
       <ResourceList
         {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
-        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} />
+        onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys} schema={schema} onRefresh={listRefresh.onRefresh} rows={rows} loading={state === 'loading'} refreshing={listRefresh.refreshing} />
     </AiSurface>
   );
 }

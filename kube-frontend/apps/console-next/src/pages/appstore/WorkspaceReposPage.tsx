@@ -275,6 +275,9 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         {
           key: 'name',
           title: t('cluster.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row) => (
             <span className="flex min-w-0 flex-col">
               <Link
@@ -334,7 +337,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
       ],
       empty: { title: t('appRepos.repos.emptyTitle'), description: t('appRepos.repos.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -368,7 +371,7 @@ export function WorkspaceReposPage({ workspace }: WorkspaceReposPageProps): Reac
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={visibleRows}
-          loading={query.isPending}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           searchValue={keyword}
           onSearchChange={(value) => setKeyword(value)}
           onRefresh={listRefresh.onRefresh}

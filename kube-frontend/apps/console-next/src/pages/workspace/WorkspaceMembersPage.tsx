@@ -5,6 +5,7 @@ import { workspaceMembersApi, type WorkspaceMemberSummary } from '@kube-ai-hub/a
 import { actionProps } from '@kube-ai-hub/ai-surface';
 import { AiSurface, Badge, ResourceList, type ListSchema } from '@kube-ai-hub/ui';
 import { useColumnVisibility } from '@/components/resource/useColumnVisibility';
+import { useListRefresh } from '@/components/resource/useListRefresh';
 import { useT } from '@/i18n';
 import { api as apiClient } from '@/api';
 import { errorMessage, ResourceErrorPanel } from '@/components/resource/ResourceErrorPanel';
@@ -77,6 +78,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
     queryKey: ['workspace-members', workspace],
     queryFn: ({ signal }) => workspaceMembersApi(apiClient).list({ workspace, signal }),
   });
+  const listRefresh = useListRefresh('workspace-members', query);
   const allRows = query.data ?? [];
   const rows = React.useMemo(() => {
     const needle = keyword.trim().toLowerCase();
@@ -92,7 +94,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
       title: t('workspace.members.title'),
       description: t('workspace.members.description'),
       primaryAction: { key: 'invite', label: t('settings.members.invite'), aiId: 'workspace-members:invite' },
-      refresh: { label: t('common.refresh'), busy: query.isFetching },
+      refresh: listRefresh.refresh,
       search: { placeholder: t('workspace.members.search'), aiId: 'workspace-members:search' },
       selection: 'multiple',
       isRowSelectable: (row) => !isSelf(row.username),
@@ -108,7 +110,9 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
       columns: [
         {
           key: 'username',
-          hideable: true,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           title: t('workspace.field.member'),
           render: (row) => (
             <span className="flex min-w-0 flex-col">
@@ -191,7 +195,7 @@ export function WorkspaceMembersPage({ workspace }: WorkspaceMembersPageProps): 
         onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           schema={schema}
           rows={rows}
-          loading={state === 'loading'}
+          loading={state === 'loading'} refreshing={query.isFetching && !query.isPending}
           searchValue={keyword}
           onSearchChange={setKeyword}
           selectedKeys={selected}

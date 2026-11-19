@@ -373,6 +373,21 @@ export interface WorkloadDescriptor {
   allowRedeploy?: boolean;
   /** Status value → locale key, mirroring the old console's status map. */
   statusKeys: Record<string, LocaleKey>;
+  /**
+   * The values the server accepts for `?status=`, in the old console's order.
+   *
+   * Omitted for kinds whose getter has no status filter (services, ingresses) — a
+   * control that cannot narrow the list is worse than no control.
+   */
+  statusFilter?: Array<{ value: string; labelKey: LocaleKey }>;
+  /**
+   * Header hint explaining what the status badge means for this kind.
+   *
+   * The same word means different things per kind: 更新中 on a Deployment is a
+   * rolling update, on a Job it is a failed run. The header is the only place the
+   * reader can find that out without opening a row.
+   */
+  statusHintKey?: LocaleKey;
 }
 
 const WORKLOAD_STATUS_KEYS = {
@@ -386,6 +401,55 @@ const POD_STATUS_KEYS = {
   running: 'workloads.status.running',
   waiting: 'workloads.status.waiting',
   terminated: 'workloads.status.terminated',
+} as const;
+
+/**
+ * Filter options per kind, in the order the old console lists them.
+ *
+ * The values are the getter's own vocabulary, not the display labels: the
+ * deployment getter compares `running|updating|stopped`, the job getter
+ * `running|completed|failed`, and the pod getter the kubectl-style
+ * `Waiting|Running|Completed|Error`. Sending the label, or the project page's
+ * lowercased state, answers an empty list while looking like a working filter.
+ */
+const WORKLOAD_STATUS_FILTER = [
+  { value: 'running', labelKey: 'workloads.status.running' },
+  { value: 'updating', labelKey: 'workloads.status.updating' },
+  { value: 'stopped', labelKey: 'workloads.status.stopped' },
+] as const;
+
+/** `JOB_STATUS` in the old console: 失败 / 已完成 / 运行中. */
+const JOB_STATUS_FILTER = [
+  { value: 'failed', labelKey: 'workloads.status.failed' },
+  { value: 'completed', labelKey: 'workloads.filter.status.completed' },
+  { value: 'running', labelKey: 'workloads.filter.status.running' },
+] as const;
+
+/** `PODS_STATUS` in the old console, capitalized because the getter matches those. */
+const POD_STATUS_FILTER = [
+  { value: 'Waiting', labelKey: 'workloads.filter.status.waiting' },
+  { value: 'Running', labelKey: 'workloads.filter.status.running' },
+  { value: 'Completed', labelKey: 'workloads.filter.status.completed' },
+  { value: 'Error', labelKey: 'workloads.filter.status.error' },
+] as const;
+
+/** `CRONJOB_STATUS` in the old console; the v1alpha2 getter compares `paused|running`. */
+const CRONJOB_STATUS_FILTER = [
+  { value: 'paused', labelKey: 'workloads.status.paused' },
+  { value: 'running', labelKey: 'workloads.status.running' },
+] as const;
+
+/** `JOB_STATUS` display map: the badge shows the server's own vocabulary. */
+const JOB_STATUS_KEYS = {
+  running: 'workloads.status.running',
+  completed: 'workloads.status.completed',
+  failed: 'workloads.status.failed',
+} as const;
+
+/** `CRONJOB_STATUS` display map. */
+const CRONJOB_STATUS_KEYS = {
+  paused: 'workloads.status.paused',
+  running: 'workloads.status.running',
 } as const;
 
 export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
@@ -403,6 +467,8 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showProgress: true,
     allowEditInfo: true,
     statusKeys: WORKLOAD_STATUS_KEYS,
+    statusFilter: [...WORKLOAD_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.workload',
   },
   statefulsets: {
     kind: 'statefulsets',
@@ -418,6 +484,8 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showProgress: true,
     allowEditInfo: true,
     statusKeys: WORKLOAD_STATUS_KEYS,
+    statusFilter: [...WORKLOAD_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.workload',
   },
   daemonsets: {
     kind: 'daemonsets',
@@ -433,6 +501,8 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showProgress: true,
     allowEditInfo: true,
     statusKeys: WORKLOAD_STATUS_KEYS,
+    statusFilter: [...WORKLOAD_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.workload',
   },
   jobs: {
     kind: 'jobs',
@@ -444,7 +514,9 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showStatus: true,
     showProgress: true,
     allowEditInfo: true,
-    statusKeys: WORKLOAD_STATUS_KEYS,
+    statusKeys: JOB_STATUS_KEYS,
+    statusFilter: [...JOB_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.job',
   },
   cronjobs: {
     kind: 'cronjobs',
@@ -458,7 +530,9 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showStatus: true,
     showProgress: true,
     allowEditInfo: true,
-    statusKeys: WORKLOAD_STATUS_KEYS,
+    statusKeys: CRONJOB_STATUS_KEYS,
+    statusFilter: [...CRONJOB_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.cronjob',
   },
   pods: {
     kind: 'pods',
@@ -470,6 +544,8 @@ export const WORKLOAD_DESCRIPTORS: Record<string, WorkloadDescriptor> = {
     showProgress: false,
     allowEditInfo: true,
     statusKeys: POD_STATUS_KEYS,
+    statusFilter: [...POD_STATUS_FILTER],
+    statusHintKey: 'workloads.hint.status.pod',
   },
   services: {
     kind: 'services',

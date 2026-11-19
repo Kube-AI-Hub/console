@@ -67,6 +67,7 @@
 | [集群级工作负载筛选与写能力](plans/page-cluster-workloads-writes-20261119.md) | 本批交付证据（2026-11-19） | 集群级负载「按项目筛选」+ 编辑信息/编辑 YAML/删除/批量删除（按项目分组）；CLUSTER_WORKLOADS E2E 3 passed |
 | [集群级服务账号写能力](plans/page-cluster-serviceaccounts-writes-20261119.md) | 本批交付证据（2026-11-19） | 集群级服务账号四个行操作（编辑 / 编辑 YAML / 修改角色 / 删除），三张跨项目配置页写入口径统一 |
 | [保密字典写能力](plans/page-secrets-writes-20261119.md) | 本批交付证据（2026-11-19） | 项目列表「设为默认镜像仓库」（先说明取消谁）+ 集群级保密字典四个行操作；保密字典 E2E 17 passed |
+| [列表交互标准化](plans/page-list-standard-20261119.md) | 本批交付证据（2026-11-19） | 固定首尾列、刷新遮罩、列头字段筛选、清除全部条件推广到全部列表；状态筛选按资源类型分词表；修复集群级负载丢失的项目筛选与行操作；新增 5 条机械守卫 |
 | [集群级配置字典写能力](plans/page-cluster-configmaps-writes-20261119.md) | 本批交付证据（2026-11-19） | 集群级配置字典四个行操作（按行命名空间寻址、联邦对象无操作）；CLUSTER_CONFIG E2E 4 passed |
 | [项目网关页集群网关卡片](plans/page-project-gateway-cluster-card-20261119.md) | 本批交付证据（2026-11-19） | 项目网关页补集群网关卡片（只读 + 链到集群详情）；同页记录**服务拓扑图接口探测**：mlu370 返回 500（依赖组件地址为空），登记为环境阻塞 |
 | [存储快照详情页签](plans/page-snapshot-detail-tabs-20261119.md) | 本批交付证据（2026-11-19） | 快照详情补回「数据来源 / 事件」两页签（事件按 VolumeSnapshot kind 读、空态分开）；存储 DETAIL E2E 5 passed |

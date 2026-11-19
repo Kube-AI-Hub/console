@@ -216,6 +216,9 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         {
           key: 'name',
           title: t('monitoring.column.name'),
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           render: (row: RuleGroupSummary) => (
             <span className="flex min-w-0 flex-col">
               <span className="truncate font-medium text-ai-fg">{row.name}</span>
@@ -333,7 +336,7 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         description: t('monitoring.ruleGroups.emptyDescription'),
       },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -391,6 +394,10 @@ export function RuleGroupsPage({ cluster, namespace }: RuleGroupsPageProps): Rea
         }}
         rows={rows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         searchValue={list.keyword}
         onSearchChange={list.setKeyword}
         filters={{ project: projectFilter, enable: enabledFilter }}

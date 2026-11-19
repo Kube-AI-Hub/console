@@ -94,6 +94,29 @@ export function jobStatus(item: KubeWorkload): WorkloadStatus {
 }
 
 /**
+ * The job state the **server** filters and displays: `running|completed|failed`.
+ *
+ * Deliberately a second function rather than a change to `jobStatus`. The two answer
+ * different questions and the old console had the same split: its list column used
+ * `getWorkloadStatus` (which folds a failure into 更新中) while the status *filter*
+ * sent `JOB_STATUS` values — 失败 / 已完成 / 运行中. Deriving the filter from the
+ * column would make 「失败」 return nothing, because no row ever carries that state.
+ *
+ * The getter (`pkg/models/resources/v1alpha3/job/jobs.go`) reads
+ * `status.conditions` for `Complete`/`Failed` and otherwise reports `running`, so
+ * the three values line up with what the server compares against.
+ */
+export function jobConditionStatus(item: KubeWorkload): 'running' | 'completed' | 'failed' {
+  const conditions = (item.status?.['conditions'] ?? []) as Array<Record<string, unknown>>;
+  for (const condition of conditions) {
+    if (condition['status'] !== 'True') continue;
+    if (condition['type'] === 'Complete') return 'completed';
+    if (condition['type'] === 'Failed') return 'failed';
+  }
+  return 'running';
+}
+
+/**
  * Pod status — `getPodStatus`.
  *
  * A pod in a terminal phase is reported as `terminated`; a pod whose phase says
@@ -119,13 +142,28 @@ export function workloadStatus(kind: WorkloadKind, item: KubeWorkload): string {
     case 'daemonsets':
       return daemonSetStatus(item);
     case 'jobs':
-    case 'cronjobs':
       return jobStatus(item);
+    case 'cronjobs':
+      return cronJobStatus(item);
     case 'pods':
       return podStatus(item);
     default:
       return '';
   }
+}
+
+/**
+ * CronJob status — paused or running.
+ *
+ * `spec.suspend` is the only state a CronJob has; the old console's `CRONJOB_STATUS`
+ * listed 暂停 / 运行中 / 终止中, but 终止中 never had a source field and a suspended
+ * job is the one thing a reader looks for. This also matches the value the kapis
+ * v1alpha2 getter filters on (`cronJobStatus` → `paused|running`), so the column and
+ * the filter cannot disagree.
+ */
+export function cronJobStatus(item: KubeWorkload): 'paused' | 'running' {
+  const suspend = item.spec?.['suspend'];
+  return suspend === true ? 'paused' : 'running';
 }
 
 /** Ready/desired counters, `-` when the kind has no such notion. */
@@ -173,6 +211,14 @@ export interface WorkloadSummary extends ResourceBase {
   /** `status.readyReplicas`-style counter, when the kind has one. */
   ready?: number;
   total?: number;
+  /**
+   * Jobs only: `running|completed|failed`, the same value the server filters on.
+   *
+   * Kept beside `status` because the two differ for a failed job — the column folds
+   * it into 更新中 (matching the old console) while the filter needs the server's own
+   * vocabulary. Without it the 「失败」 filter would narrow to a state no row shows.
+   */
+  condition?: 'running' | 'completed' | 'failed';
   /** Pod only: the node it runs on (`spec.nodeName`). */
   node?: string;
   /** Pod only: the node's own IP (`status.hostIP`), which the old list printed beside the name. */
@@ -352,6 +398,7 @@ export function toWorkloadSummary(kind: WorkloadKind, item: KubeWorkload): Workl
       : {}),
     app: appOf(item),
     replicas: replicasOf(item),
+    ...(kind === 'jobs' ? { condition: jobConditionStatus(item) } : {}),
     ...(progress.ready !== undefined ? { ready: progress.ready } : {}),
     ...(progress.total !== undefined ? { total: progress.total } : {}),
     images: imagesOf(item),

@@ -194,6 +194,9 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
       {
         key: 'name',
         title: t('cluster.column.name'),
+        /* Pinned: the row's identity, kept in place while the other columns scroll. */
+        width: 220,
+        pin: 'start',
         render: (row) => nameCell(row),
       },
       {
@@ -229,7 +232,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
     ],
     empty: { title: t('common.empty'), description: t('cluster.resourceMonitor.emptyHint') },
     labels: {
-      ...listRefresh.emptyLabels,
+      ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
       selectAll: t('table.selectAll'),
       selectRow: (index) => t('table.selectRow', { index }),
       moreActions: t('table.moreActions'),
@@ -328,6 +331,7 @@ export function ResourceMonitorPage({ cluster }: ResourceMonitorPageProps): Reac
               onRefresh={listRefresh.onRefresh}
               rows={pageRows}
               loading={loading}
+              refreshing={listRefresh.refreshing}
               searchValue={list.keyword}
               onSearchChange={list.setKeyword}
               onPageChange={list.setPage}

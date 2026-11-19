@@ -133,6 +133,9 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
       {
         key: 'name',
         title: t('settings.gateway.name'),
+        /* Pinned: the row's identity, kept in place while the other columns scroll. */
+        width: 220,
+        pin: 'start',
         render: (row) => (
           <a
             className="font-medium text-ai-link hover:underline"
@@ -299,7 +302,7 @@ export function ClusterGatewaysPage({ cluster, component = 'cluster' }: {
           {...(columnVisibility.visibleColumnKeys ? { visibleColumnKeys: columnVisibility.visibleColumnKeys } : {})}
           onVisibleColumnsChange={columnVisibility.setVisibleColumnKeys}
           rows={rows}
-          loading={query.isPending}
+          loading={query.isPending} refreshing={query.isFetching && !query.isPending}
           searchValue={search}
           onSearchChange={setSearch}
           onRefresh={() => void query.refetch()}

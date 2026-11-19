@@ -177,7 +177,9 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
       columns: [
         {
           key: 'username',
-          hideable: true,
+          /* Pinned: the row's identity, kept in place while the other columns scroll. */
+          width: 220,
+          pin: 'start',
           title: t('platform.column.username'),
           render: (row: ClusterMemberSummary) => (
             <span className="flex min-w-0 items-center gap-2">
@@ -221,7 +223,7 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
       ],
       empty: { title: t('cluster.members.emptyTitle'), description: t('cluster.members.emptyDescription') },
       labels: {
-        ...listRefresh.emptyLabels,
+        ...listRefresh.emptyLabels, ...listRefresh.filterLabels,
         selectAll: t('table.selectAll'),
         selectRow: (index) => t('table.selectRow', { index }),
         moreActions: t('table.moreActions'),
@@ -269,6 +271,10 @@ export function ClusterMembersPage({ cluster }: ClusterMembersPageProps): React.
         }}
         rows={pageRows}
         loading={state === 'loading'}
+
+        // Rows stay while a refetch runs, dimmed, so the reader keeps their place
+        // and the refresh button's spinner has something to explain.
+        refreshing={listRefresh.refreshing}
         selectedKeys={selected}
         onSelectionChange={setSelected}
         onAction={(action, row) => {
