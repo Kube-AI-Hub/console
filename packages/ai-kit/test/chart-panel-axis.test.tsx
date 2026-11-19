@@ -64,6 +64,29 @@ describe('ChartPanel axis', () => {
     expect(plot!.getAttribute('data-ai-state')).toBe('ready');
   });
 
+  it('stands the skeleton in the plot box on a first load, not above it', () => {
+    /*
+     * The defect this pins: the skeleton and the plot were both rendered, so the
+     * skeleton sat in the flow above the chart and a 120px panel measured twice that,
+     * with empty axes showing underneath the placeholder. A first load draws the
+     * skeleton *instead of* the plot; a refresh keeps the plot and veils it.
+     */
+    const view = render(
+      <ChartPanel
+        aiId="test:loading"
+        title="趋势"
+        series={[{ key: 'a', label: '甲', points: POINTS }]}
+        range={presetRange('1h')}
+        onRangeChange={() => undefined}
+        labels={LABELS}
+        state="loading"
+        height={120}
+      />,
+    );
+    expect(view.container.querySelector('[data-ai-id="test:loading:loading"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="test:loading:plot"]')).toBeNull();
+  });
+
   it('falls back to resolving the range when the host passes none', () => {
     // A story or a read-only panel has no query of its own; it still has to draw.
     const view = render(

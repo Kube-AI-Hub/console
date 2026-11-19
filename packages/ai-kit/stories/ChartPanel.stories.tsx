@@ -72,6 +72,14 @@ function PanelDemo({ state = 'ready' as const, single = false }: { state?: 'load
       series={single ? [SERIES[0]!] : SERIES}
       range={range}
       onRangeChange={setRange}
+      /*
+       * The fixture's points are pinned to `NOW`, so the panel is given that span
+       * instead of resolving `最近 1 小时` against the real clock — otherwise every
+       * point falls outside the window and the plot is empty.
+       */
+      start={NOW - 60 * MINUTE}
+      end={NOW}
+      step="60s"
       labels={LABELS}
       state={state}
       onRetry={() => undefined}
@@ -105,6 +113,9 @@ export const PanelBars: Story = {
         series={[{ key: 'pods', label: '容器组', points: curve(0, 0.4) }]}
         range={range}
         onRangeChange={setRange}
+        start={NOW - 60 * MINUTE}
+        end={NOW}
+        step="60s"
         labels={LABELS}
         state="ready"
         chartType="bar"

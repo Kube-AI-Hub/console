@@ -325,7 +325,7 @@ export function OverviewResourcePanel({ cluster, refreshAt, manualRefresh }: {
        * have data" — which the chart's own state also answers, but from a node that
        * only exists once the plot has been laid out.
        */
-      data-ai-state={trendState === 'refreshing' ? 'ready' : trendState}
+      data-ai-state={trendState}
     >
       {/*
         * `ChartPanel` owns the window picker, the refresh and the fixed-height plot.

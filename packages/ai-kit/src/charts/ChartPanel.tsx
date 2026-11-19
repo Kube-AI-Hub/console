@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Button } from '../primitives/Button';
 import { Icon } from '../primitives/Icon/Icon';
+import { ChartSkeleton, RefreshVeil } from '../primitives/RefreshVeil';
 import { TimeRangePicker, type TimeRangePickerLabels } from './TimeRangePicker';
 import { TimeSeriesChart, type TimeSeries } from './TimeSeriesChart';
 import { gapForStep, resolveRange, stepToMs, type TimeRange } from './timeRange';
@@ -195,12 +196,13 @@ export function ChartPanel({
   /*
    * Whether this refresh is the reader's or the clock's.
    *
-   * The panel cannot tell them apart from `state` alone — both are "fetching with
-   * rows on screen" — so the host says which: `manualRefresh` is set while the
-   * refresh button's own request runs, and cleared once it settles. An auto tick
-   * leaves it false, which is what keeps the veil off the frequent path.
+   * `manualRefresh` is the precise signal: the host knows which request it started,
+   * and an auto tick must not veil. But `state === 'refreshing'` already means "data
+   * is on screen and being replaced" — a panel rendered in that state (a story, a
+   * host that has not wired the flag yet) must look like a refresh rather than like
+   * nothing happening. So the veil shows when either says so.
    */
-  const manual = busy && manualRefresh === true;
+  const manual = busy && (manualRefresh === true || manualRefresh === undefined);
 
   return (
     <section
@@ -272,13 +274,7 @@ export function ChartPanel({
        * moves the page under the reader's cursor.
        */}
       <div className="relative" style={{ minHeight: height }}>
-        {state === 'loading' ? (
-          <div
-            className="absolute inset-0 animate-pulse rounded-ai-md bg-ai-surface-2/60 motion-reduce:animate-none"
-            data-ai-id={`${aiId}:loading`}
-            aria-label={labels.loading}
-          />
-        ) : null}
+        {state === 'loading' ? <ChartSkeleton height={height} aiId={`${aiId}:loading`} /> : null}
 
         {state === 'error' ? (
           <div className="flex flex-col items-start gap-2 py-6" data-ai-id={`${aiId}:error`}>
@@ -291,7 +287,14 @@ export function ChartPanel({
           </div>
         ) : null}
 
-        {state !== 'error' ? (
+        {/*
+         * The plot is not drawn on the first load: the skeleton stands in its box.
+         *
+         * Rendering both put the skeleton in the flow above the plot, so a 220px panel
+         * measured 468px and the empty axes showed underneath the placeholder. A
+         * refresh is different — there the previous series stay on screen, dimmed.
+         */}
+        {state !== 'error' && state !== 'loading' ? (
           <div
             /*
              * Dimming is for a *manual* refresh only. An auto-refresh moves the window
@@ -311,8 +314,6 @@ export function ChartPanel({
               height={height}
               maxGap={gapForStep(resolved.step)}
               gridSlack={stepToMs(resolved.step) / 2}
-              refreshing={manual}
-              refreshingLabel={labels.refreshing}
               {...(yDomain ? { yDomain } : {})}
               {...(formatAxis ? { formatAxis } : {})}
               {...(formatValue ? { formatValue } : {})}
@@ -326,6 +327,15 @@ export function ChartPanel({
               * no layout — a zero-height marker with the panel's id.
               */}
             <span className="sr-only" data-ai-id={`${aiId}:legend`} aria-hidden="true" />
+            {/*
+             * The veil is drawn here, not inside the plot.
+             *
+             * The plot renders an empty state when a series has no points — and a
+             * refresh is exactly when that can happen. A veil nested in the plot would
+             * vanish with it, so the panel owns the layer: the same `RefreshVeil` every
+             * table uses, always covering the plot box.
+             */}
+            {manual ? <RefreshVeil aiId={`${aiId}:refreshing`} label={labels.refreshing} /> : null}
           </div>
         ) : null}
       </div>

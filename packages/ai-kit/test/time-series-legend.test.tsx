@@ -168,19 +168,19 @@ describe('TimeSeriesChart refresh', () => {
     const view = render(
       <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} />,
     );
-    expect(view.container.querySelector('[data-ai-chart-refreshing]')).toBeNull();
+    expect(view.container.querySelector('[data-ai-id="chart:refreshing"]')).toBeNull();
 
     view.rerender(
       <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} refreshing />,
     );
-    expect(view.container.querySelector('[data-ai-chart-refreshing]')).not.toBeNull();
+    expect(view.container.querySelector('[data-ai-id="chart:refreshing"]')).not.toBeNull();
     // The drawing is still there behind the veil.
     expect(view.container.querySelector('[data-ai-state="ready"]')).not.toBeNull();
 
     view.rerender(
       <TimeSeriesChart label="趋势" emptyText="无数据" start={0} end={100} series={SERIES} animate={false} />,
     );
-    expect(view.container.querySelector('[data-ai-chart-refreshing]')).toBeNull();
+    expect(view.container.querySelector('[data-ai-id="chart:refreshing"]')).toBeNull();
   });
 
   it('holds a fixed plot height so data arriving cannot move the page', () => {

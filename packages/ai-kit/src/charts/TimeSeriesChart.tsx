@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { cn } from '../utils/cn';
+import { RefreshVeil } from '../primitives/RefreshVeil';
 import { prefersReducedMotion } from './PieChart';
 import { useChartPalette } from './useChartPalette';
 
@@ -72,6 +73,13 @@ export interface TimeSeries {
 }
 
 export interface TimeSeriesChartProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onMouseMove'> {
+  /**
+   * Stable handle for the chart, rendered as `data-ai-id`.
+   *
+   * Declared here because `data-*` is not part of `HTMLAttributes`; the refresh veil
+   * derives its own handle from it, so the two can be addressed together.
+   */
+  'data-ai-id'?: string;
   series: TimeSeries[];
   /** Epoch milliseconds. */
   start: number;
@@ -286,6 +294,7 @@ export function TimeSeriesChart({
   animate = true,
   refreshing = false,
   refreshingLabel = '更新中…',
+  'data-ai-id': chartAiId,
   legend = 'bottom',
   onToggleSeries,
   className,
@@ -412,7 +421,13 @@ export function TimeSeriesChart({
   const hasBar = visible.some((entry) => entry.type === 'bar');
 
   return (
-    <div {...attributes} ref={hostRef} className={cn('flex min-w-0 flex-col gap-2', className)} data-ai-state="ready">
+    <div
+      {...attributes}
+      ref={hostRef}
+      className={cn('flex min-w-0 flex-col gap-2', className)}
+      data-ai-state="ready"
+      {...(chartAiId ? { 'data-ai-id': chartAiId } : {})}
+    >
       {/*
         * A fixed-height box around the plot.
         *
@@ -518,22 +533,21 @@ export function TimeSeriesChart({
           * The manual-refresh veil, inside the fixed box so nothing moves when it
           * appears. It covers the drawing only — the legend stays readable, which is
           * what a reader compares against once the new data lands.
+          *
+          * `ChartPanel` draws its own veil as well, one level up: a chart with no
+          * points renders the empty state instead of this subtree, and a refresh is
+          * exactly when that can happen. Only one of the two is ever visible.
           */}
         {refreshing ? (
-          <div
-            aria-hidden="true"
-            data-ai-chart-refreshing
-            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-ai-sm bg-ai-bg/45 backdrop-blur-[1px]"
-          >
-            <span className="flex items-center gap-2 rounded-ai-pill border border-ai-line bg-ai-bg-overlay px-3 py-1.5 text-[11px] text-ai-fg-secondary shadow-ai-pop">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                className="size-3.5 animate-spin motion-reduce:animate-none">
-                <path d="M20 11a8 8 0 1 0-2.3 5.7" />
-                <path d="M20 4v7h-7" />
-              </svg>
-              {refreshingLabel}
-            </span>
-          </div>
+          <RefreshVeil
+            /*
+             * The chart's own handle plus `:refreshing`, so an automation can wait
+             * for the veil of the chart it is watching. `chartAiId` is the handle the
+             * host set on the chart (`<aiId>:chart`); the suffix keeps them apart.
+             */
+            {...(chartAiId ? { aiId: `${chartAiId}:refreshing` } : { aiId: 'chart:refreshing' })}
+            label={refreshingLabel}
+          />
         ) : null}
       </div>
 

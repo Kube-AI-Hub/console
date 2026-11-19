@@ -58,6 +58,15 @@ export {
   TREND_SERIES_COLORS,
   Progress,
   Skeleton,
+  /*
+   * The refresh veil and the chart skeleton.
+   *
+   * Shared so every in-place refresh looks the same — the resource tables and the
+   * chart panels both draw `RefreshVeil`, and a chart's first load uses the same
+   * pulse bars as a table's skeleton rows.
+   */
+  RefreshVeil,
+  ChartSkeleton,
   Table,
   Tabs,
   TabsContent,
@@ -96,6 +105,8 @@ export type {
   AccentPalette,
   ButtonProps,
   CardProps,
+  RefreshVeilProps,
+  ChartSkeletonProps,
   DescriptionItemProps,
   DescriptionListProps,
   PanelProps,

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../utils/cn';
 import { Tooltip } from './Feedback';
 import { Icon } from './Icon/Icon';
+import { RefreshVeil } from './RefreshVeil';
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -609,28 +610,11 @@ export function Table<T>({
         * show they are being replaced, with a spinner that says the wait is active.
         * A skeleton screen here would blink the table and lose the reader's place.
         *
-        * `absolute inset-0` covers the rows rather than sitting under them: a bar at
-        * the bottom of a tall table is easy to miss, and the reader's eye is on the
-        * values that are about to change. `pointer-events-none` keeps the dimmed rows
-        * inert without trapping focus or blocking the scrollbar, and `aria-busy` on
-        * the container is what tells a screen reader the content is being replaced.
+        * The veil itself is the shared `RefreshVeil`, so the chart panels and every
+        * table look identical while refreshing — one implementation rather than two
+        * copies that drift on tint, radius and z-index.
         */}
-      {refreshing ? (
-        <div
-          aria-hidden="true"
-          data-ai-id="table:refreshing"
-          className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center gap-2 bg-ai-bg/40 backdrop-blur-[1px]"
-        >
-          <span className="flex items-center gap-2 rounded-ai-pill border border-ai-line bg-ai-bg-overlay px-3 py-1.5 text-[11px] text-ai-fg-secondary shadow-ai-pop">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-              className="size-3.5 animate-spin motion-reduce:animate-none">
-              <path d="M20 11a8 8 0 1 0-2.3 5.7" />
-              <path d="M20 4v7h-7" />
-            </svg>
-            更新中…
-          </span>
-        </div>
-      ) : null}
+      {refreshing ? <RefreshVeil aiId="table:refreshing" /> : null}
     </div>
   );
 }
