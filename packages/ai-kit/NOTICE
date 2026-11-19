@@ -141,6 +141,17 @@ required by the Apache License 2.0, section 4(b):
   `logout` cannot express that split, so the glyph is replaced with the
   conventional meaning — a doorway open to the right with an arrow leaving — drawn
   as one `evenodd` path. `login-accounts` keeps its box-and-person mark.
+- **Second un-slabbing pass.** A further twenty symbols had the same repaint
+  defect found by rendering every symbol's parts separately: a plate path carved
+  its interior detail, then a sibling path in the same ink filled the cut-outs
+  back in. `success`, `question`, `radio` and `safe-notice` painted their tick,
+  question mark and inner disc on top of the ring that had already carved them;
+  `textfield`, `report`, `port` and `trash` repeated a whole sub-shape twice
+  inside one path so the two copies cancelled; `user-overview` and `vsan`
+  repainted their busts and disc; `loading-circle-duotone` stacked four arcs that
+  swallowed the ring. `kafka`, `mongo-db`, `redis`, `database`, `zone`, `vnas`,
+  `wallet`, `shield`, `cpu` and `text` were redrawn as single `evenodd` compounds
+  whose detail cuts out of the plate. The drawn silhouettes are unchanged.
 - **Everything else is unmodified.** Apart from the brand mark and the colour
   substitution above, the remaining symbols are byte-identical to upstream, in the
   same order. `timed-task`, `clock`, `calendar` and `history-duotone` are among them.
